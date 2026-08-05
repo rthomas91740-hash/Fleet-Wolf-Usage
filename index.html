@@ -8,120 +8,160 @@
   body {
     font-family: "Segoe UI", Arial, sans-serif;
     margin: 0;
-    padding: 16px;
-    background: #f5f6f8;
+    padding: 18px;
+    background: #f2f4f7;
     color: #222;
   }
   h1 {
-    font-size: 20px;
-    margin: 0 0 4px 0;
+    font-size: 22px;
+    margin: 0 0 2px 0;
+    letter-spacing: -0.01em;
   }
   .subtitle {
-    color: #666;
+    color: #667;
     font-size: 13px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
   }
   .controls {
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    padding: 14px 16px;
+    background: linear-gradient(135deg, #0072c6, #00a8e8);
+    border-radius: 10px;
+    padding: 16px 18px;
     display: flex;
     align-items: flex-end;
     gap: 16px;
     flex-wrap: wrap;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 14px rgba(0,114,198,0.25);
   }
   .field { display: flex; flex-direction: column; gap: 4px; }
-  .field label { font-size: 12px; color: #555; font-weight: 600; }
+  .field label { font-size: 11px; color: #eaf6ff; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
   .field input {
-    padding: 6px 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 7px 9px;
+    border: none;
+    border-radius: 5px;
     font-size: 13px;
   }
   button {
-    background: #0072c6;
-    color: #fff;
+    background: #fff;
+    color: #0072c6;
     border: none;
-    padding: 8px 18px;
-    border-radius: 4px;
+    padding: 9px 20px;
+    border-radius: 5px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
   }
-  button:hover { background: #005a9e; }
-  button:disabled { background: #99c2e0; cursor: default; }
+  button:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
+  button:disabled { background: #cfe6f7; color: #7fa; cursor: default; transform: none; box-shadow: none; }
   .status {
     font-size: 13px;
     color: #666;
     margin-bottom: 12px;
     min-height: 18px;
   }
-  .status.error { color: #c0392b; }
+  .status.error { color: #c0392b; font-weight: 600; }
   .summary {
     display: flex;
     gap: 12px;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
   }
   .stat {
     background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    padding: 12px 18px;
+    border-radius: 10px;
+    padding: 14px 20px;
     min-width: 130px;
+    box-shadow: 0 2px 8px rgba(20,30,60,0.06);
+    border-top: 3px solid #0072c6;
   }
-  .stat .value { font-size: 22px; font-weight: 700; color: #0072c6; }
-  .stat .label { font-size: 11px; color: #777; text-transform: uppercase; letter-spacing: 0.03em; }
+  .stat .value { font-size: 24px; font-weight: 800; color: #0072c6; }
+  .stat .label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
   .panel {
     background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    padding: 16px;
-    margin-bottom: 18px;
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(20,30,60,0.06);
   }
   .panel h2 {
     font-size: 14px;
-    margin: 0 0 12px 0;
+    margin: 0 0 14px 0;
     color: #333;
   }
-  .chart {
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 180px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    border-bottom: 1px solid #eee;
+
+  /* Calendar */
+  .cal-month {
+    margin-bottom: 22px;
   }
-  .bar-wrap {
+  .cal-month:last-child { margin-bottom: 0; }
+  .cal-month-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0072c6;
+    margin-bottom: 8px;
+  }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+  }
+  .cal-weekday {
+    font-size: 10px;
+    font-weight: 700;
+    color: #999;
+    text-align: center;
+    text-transform: uppercase;
+    padding-bottom: 2px;
+  }
+  .cal-cell {
+    position: relative;
+    border-radius: 7px;
+    aspect-ratio: 1 / 1;
+    min-height: 54px;
+    padding: 5px 6px;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    cursor: default;
+  }
+  .cal-cell.has-data:hover {
+    transform: scale(1.06);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+    z-index: 2;
+  }
+  .cal-cell.empty { background: transparent; }
+  .cal-cell.out-of-range {
+    background: #f7f8fa;
+    color: #ccc;
+  }
+  .cal-day-num {
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .cal-count {
+    font-size: 15px;
+    font-weight: 800;
+    align-self: flex-end;
+  }
+  .cal-cell.out-of-range .cal-day-num { color: #ccc; }
+
+  .legend {
+    display: flex;
     align-items: center;
-    min-width: 22px;
-    height: 100%;
-    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 14px;
+    font-size: 11px;
+    color: #888;
   }
-  .bar {
+  .legend-swatch {
     width: 16px;
-    background: #0072c6;
-    border-radius: 2px 2px 0 0;
-    min-height: 2px;
+    height: 12px;
+    border-radius: 3px;
+    display: inline-block;
   }
-  .bar-count {
-    font-size: 9px;
-    color: #555;
-    margin-bottom: 2px;
-  }
-  .bar-date {
-    font-size: 8px;
-    color: #999;
-    margin-top: 4px;
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    height: 46px;
-  }
+
   table {
     width: 100%;
     border-collapse: collapse;
@@ -129,34 +169,48 @@
   }
   th, td {
     text-align: left;
-    padding: 6px 8px;
-    border-bottom: 1px solid #eee;
+    padding: 7px 8px;
+    border-bottom: 1px solid #f0f1f3;
   }
   th {
-    color: #666;
-    font-weight: 600;
-    font-size: 11px;
+    color: #888;
+    font-weight: 700;
+    font-size: 10px;
     text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
-  tr:hover td { background: #fafbfc; }
-  .not-out {
-    color: #999;
-    font-size: 11px;
-  }
+  tr:hover td { background: #fafbfd; }
   .util-bar-bg {
-    background: #eee;
-    border-radius: 3px;
+    background: #eef0f3;
+    border-radius: 4px;
     height: 8px;
-    width: 100px;
+    width: 110px;
     overflow: hidden;
     display: inline-block;
     vertical-align: middle;
-    margin-right: 6px;
+    margin-right: 8px;
   }
   .util-bar-fill {
-    background: #27ae60;
+    background: linear-gradient(90deg, #27ae60, #2ecc71);
     height: 100%;
+    border-radius: 4px;
   }
+  .rank-badge {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 50%;
+    background: #eef0f3;
+    color: #888;
+    font-size: 10px;
+    font-weight: 700;
+    margin-right: 6px;
+  }
+  .rank-badge.gold { background: #ffd700; color: #7a5c00; }
+  .rank-badge.silver { background: #d7d9dc; color: #555; }
+  .rank-badge.bronze { background: #cd7f32; color: #fff; }
   .hidden { display: none; }
 </style>
 </head>
@@ -183,18 +237,9 @@
     <div class="summary" id="summary"></div>
 
     <div class="panel">
-      <h2>Vehicles Out Per Day</h2>
-      <div class="chart" id="chart"></div>
-    </div>
-
-    <div class="panel">
-      <h2>Daily Detail</h2>
-      <table>
-        <thead>
-          <tr><th>Date</th><th>Vehicles Out</th><th>Not Out</th></tr>
-        </thead>
-        <tbody id="dailyTableBody"></tbody>
-      </table>
+      <h2>Daily Calendar</h2>
+      <div id="calendarContainer"></div>
+      <div class="legend" id="legend"></div>
     </div>
 
     <div class="panel">
@@ -216,23 +261,17 @@ geotab.addin.fleetUsageReport = function () {
   var elTo = null;
   var elRunBtn = null;
   var elStatus = null;
-  var elResults = null;
   var apiRef = null;
+
+  var WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   // ---- helpers -------------------------------------------------------
 
   function toLocalDateKey(d) {
-    // YYYY-MM-DD in local time
     var y = d.getFullYear();
     var m = String(d.getMonth() + 1).padStart(2, "0");
     var day = String(d.getDate()).padStart(2, "0");
     return y + "-" + m + "-" + day;
-  }
-
-  function formatDateShort(key) {
-    var parts = key.split("-");
-    var d = new Date(parts[0], parts[1] - 1, parts[2]);
-    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   }
 
   function dateRangeKeys(fromKey, toKey) {
@@ -259,6 +298,19 @@ geotab.addin.fleetUsageReport = function () {
     elFrom.value = toLocalDateKey(monthAgo);
   }
 
+  // color scale: 0% -> pale blue, 100% -> deep blue
+  function colorForPct(pct) {
+    // pct 0..1
+    var lightness = 94 - (pct * 54); // 94% (near white) down to 40%
+    var saturation = 70;
+    var hue = 206;
+    return "hsl(" + hue + ", " + saturation + "%, " + lightness + "%)";
+  }
+
+  function textColorForPct(pct) {
+    return pct > 0.55 ? "#fff" : "#1b3a52";
+  }
+
   // ---- data fetching ---------------------------------------------------
 
   function getActiveDevices(callback) {
@@ -269,7 +321,6 @@ geotab.addin.fleetUsageReport = function () {
       var now = new Date();
       var active = devices.filter(function (d) {
         var activeTo = d.activeTo ? new Date(d.activeTo) : null;
-        // Geotab uses a far-future date for "no end date"; treat far-future or null as active
         return !activeTo || activeTo > now;
       });
       callback(active);
@@ -295,17 +346,99 @@ geotab.addin.fleetUsageReport = function () {
 
   // ---- rendering ---------------------------------------------------
 
+  function buildCalendar(dailyByKey, fromKey, toKey, totalVehicles) {
+    var container = document.getElementById("calendarContainer");
+    container.innerHTML = "";
+
+    var start = new Date(fromKey + "T00:00:00");
+    var end = new Date(toKey + "T00:00:00");
+
+    // iterate month by month
+    var monthCursor = new Date(start.getFullYear(), start.getMonth(), 1);
+    var lastMonth = new Date(end.getFullYear(), end.getMonth(), 1);
+
+    while (monthCursor <= lastMonth) {
+      var year = monthCursor.getFullYear();
+      var month = monthCursor.getMonth();
+      var monthLabel = monthCursor.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+      var daysInMonth = new Date(year, month + 1, 0).getDate();
+      var firstWeekday = new Date(year, month, 1).getDay();
+
+      var monthDiv = document.createElement("div");
+      monthDiv.className = "cal-month";
+
+      var title = document.createElement("div");
+      title.className = "cal-month-title";
+      title.textContent = monthLabel;
+      monthDiv.appendChild(title);
+
+      var grid = document.createElement("div");
+      grid.className = "cal-grid";
+
+      WEEKDAY_LABELS.forEach(function (wd) {
+        var el = document.createElement("div");
+        el.className = "cal-weekday";
+        el.textContent = wd;
+        grid.appendChild(el);
+      });
+
+      for (var i = 0; i < firstWeekday; i++) {
+        var pad = document.createElement("div");
+        pad.className = "cal-cell empty";
+        grid.appendChild(pad);
+      }
+
+      for (var day = 1; day <= daysInMonth; day++) {
+        var d = new Date(year, month, day);
+        var key = toLocalDateKey(d);
+        var cell = document.createElement("div");
+
+        if (key < fromKey || key > toKey) {
+          cell.className = "cal-cell out-of-range";
+          cell.innerHTML = '<div class="cal-day-num">' + day + '</div>';
+        } else {
+          var rec = dailyByKey[key];
+          var pct = totalVehicles ? rec.count / totalVehicles : 0;
+          cell.className = "cal-cell has-data";
+          cell.style.background = colorForPct(pct);
+          cell.style.color = textColorForPct(pct);
+          var notOutText = rec.notOutNames.length ? rec.notOutNames.join(", ") : "All vehicles out";
+          cell.title = monthLabel.split(" ")[0] + " " + day + ": " + rec.count + " of " + totalVehicles + " out. Not out: " + notOutText;
+          cell.innerHTML =
+            '<div class="cal-day-num">' + day + '</div>' +
+            '<div class="cal-count">' + rec.count + '</div>';
+        }
+        grid.appendChild(cell);
+      }
+
+      monthDiv.appendChild(grid);
+      container.appendChild(monthDiv);
+
+      monthCursor.setMonth(monthCursor.getMonth() + 1);
+    }
+
+    // legend
+    var legend = document.getElementById("legend");
+    legend.innerHTML = "Fewer vehicles out ";
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (p) {
+      var sw = document.createElement("span");
+      sw.className = "legend-swatch";
+      sw.style.background = colorForPct(p);
+      legend.appendChild(sw);
+    });
+    legend.innerHTML += " More vehicles out";
+  }
+
   function render(devices, trips, fromKey, toKey) {
     var deviceById = {};
     devices.forEach(function (d) { deviceById[d.id] = d.name; });
 
-    // deviceId -> Set of date keys it had a trip
     var deviceDayMap = {};
     devices.forEach(function (d) { deviceDayMap[d.id] = new Set(); });
 
     trips.forEach(function (trip) {
       if (!trip.device || !trip.device.id) { return; }
-      if (!(trip.device.id in deviceDayMap)) { return; } // trip from a device outside our active list
+      if (!(trip.device.id in deviceDayMap)) { return; }
       var start = trip.start ? new Date(trip.start) : null;
       if (!start) { return; }
       var key = toLocalDateKey(start);
@@ -313,7 +446,8 @@ geotab.addin.fleetUsageReport = function () {
     });
 
     var dayKeys = dateRangeKeys(fromKey, toKey);
-    var dailyCounts = dayKeys.map(function (key) {
+    var dailyByKey = {};
+    dayKeys.forEach(function (key) {
       var count = 0;
       var outNames = [];
       var notOutNames = [];
@@ -325,12 +459,11 @@ geotab.addin.fleetUsageReport = function () {
           notOutNames.push(d.name);
         }
       });
-      return { key: key, count: count, outNames: outNames, notOutNames: notOutNames };
+      dailyByKey[key] = { count: count, outNames: outNames, notOutNames: notOutNames };
     });
 
-    // ---- summary stats ----
     var totalVehicles = devices.length;
-    var counts = dailyCounts.map(function (r) { return r.count; });
+    var counts = dayKeys.map(function (k) { return dailyByKey[k].count; });
     var avg = counts.length ? (counts.reduce(function (a, b) { return a + b; }, 0) / counts.length) : 0;
     var max = counts.length ? Math.max.apply(null, counts) : 0;
     var min = counts.length ? Math.min.apply(null, counts) : 0;
@@ -351,35 +484,8 @@ geotab.addin.fleetUsageReport = function () {
       summaryEl.appendChild(div);
     });
 
-    // ---- chart ----
-    var chartEl = document.getElementById("chart");
-    chartEl.innerHTML = "";
-    dailyCounts.forEach(function (r) {
-      var pct = totalVehicles ? (r.count / totalVehicles) * 150 : 0;
-      var wrap = document.createElement("div");
-      wrap.className = "bar-wrap";
-      wrap.title = r.key + ": " + r.count + " of " + totalVehicles + " out";
-      wrap.innerHTML =
-        '<div class="bar-count">' + r.count + '</div>' +
-        '<div class="bar" style="height:' + Math.max(pct, 2) + 'px"></div>' +
-        '<div class="bar-date">' + formatDateShort(r.key) + '</div>';
-      chartEl.appendChild(wrap);
-    });
+    buildCalendar(dailyByKey, fromKey, toKey, totalVehicles);
 
-    // ---- daily table ----
-    var dailyBody = document.getElementById("dailyTableBody");
-    dailyBody.innerHTML = "";
-    dailyCounts.slice().reverse().forEach(function (r) {
-      var tr = document.createElement("tr");
-      var notOutText = r.notOutNames.length ? r.notOutNames.join(", ") : "—";
-      tr.innerHTML =
-        "<td>" + formatDateShort(r.key) + "</td>" +
-        "<td>" + r.count + " / " + totalVehicles + "</td>" +
-        '<td class="not-out">' + notOutText + "</td>";
-      dailyBody.appendChild(tr);
-    });
-
-    // ---- per-vehicle utilization ----
     var vehicleStats = devices.map(function (d) {
       var daysOut = deviceDayMap[d.id].size;
       var pct = dayKeys.length ? (daysOut / dayKeys.length) * 100 : 0;
@@ -388,10 +494,14 @@ geotab.addin.fleetUsageReport = function () {
 
     var vehicleBody = document.getElementById("vehicleTableBody");
     vehicleBody.innerHTML = "";
-    vehicleStats.forEach(function (v) {
+    var badgeClasses = ["gold", "silver", "bronze"];
+    vehicleStats.forEach(function (v, idx) {
       var tr = document.createElement("tr");
+      var badge = idx < 3
+        ? '<span class="rank-badge ' + badgeClasses[idx] + '">' + (idx + 1) + '</span>'
+        : '<span class="rank-badge">' + (idx + 1) + '</span>';
       tr.innerHTML =
-        "<td>" + v.name + "</td>" +
+        "<td>" + badge + v.name + "</td>" +
         "<td>" + v.daysOut + " / " + dayKeys.length + "</td>" +
         "<td>" +
           '<span class="util-bar-bg"><span class="util-bar-fill" style="width:' + v.pct.toFixed(0) + '%"></span></span>' +
@@ -443,22 +553,15 @@ geotab.addin.fleetUsageReport = function () {
       elTo = document.getElementById("toDate");
       elRunBtn = document.getElementById("runBtn");
       elStatus = document.getElementById("status");
-      elResults = document.getElementById("results");
 
       defaultDates();
       elRunBtn.addEventListener("click", runReport);
-
-      // Auto-run on first load with default range
       runReport();
 
       callback();
     },
-    focus: function () {
-      // no-op: report only refreshes on button click
-    },
-    blur: function () {
-      // no-op
-    }
+    focus: function () {},
+    blur: function () {}
   };
 };
 </script>
