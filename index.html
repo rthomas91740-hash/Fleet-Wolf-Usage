@@ -121,35 +121,32 @@
   .cal-month { margin-bottom: 22px; }
   .cal-month:last-child { margin-bottom: 0; }
   .cal-month-title { font-size: 13px; font-weight: 700; color: #0072c6; margin-bottom: 8px; }
-  .cal-grid { display: grid !important; grid-template-columns: repeat(7, 1fr) !important; gap: 5px !important; width: 100%; }
-  .cal-weekday {
+  table.cal-table { width: 100%; border-collapse: separate; border-spacing: 5px; table-layout: fixed; font-size: 12px; }
+  table.cal-table th.cal-weekday-th {
     font-size: 10px;
     font-weight: 700;
     color: #999;
     text-align: center;
     text-transform: uppercase;
-    padding-bottom: 2px;
+    padding: 0 0 4px 0;
+    border: none;
   }
-  .cal-cell {
+  table.cal-table td.cal-cell {
     position: relative;
     border-radius: 7px;
-    aspect-ratio: 1 / 1;
-    min-height: 54px;
-    max-width: 100%;
+    height: 54px;
     padding: 5px 6px;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between;
+    vertical-align: top;
+    border: none;
     transition: transform 0.1s ease, box-shadow 0.1s ease;
     cursor: default;
-    box-sizing: border-box;
   }
-  .cal-cell.has-data:hover { transform: scale(1.06); box-shadow: 0 4px 12px rgba(0,0,0,0.18); z-index: 2; }
-  .cal-cell.empty { background: transparent; }
-  .cal-cell.out-of-range { background: #f7f8fa; color: #ccc; }
+  table.cal-table td.cal-cell.has-data:hover { box-shadow: 0 0 0 2px rgba(0,114,198,0.4) inset; }
+  table.cal-table td.cal-cell.empty { background: transparent; }
+  table.cal-table td.cal-cell.out-of-range { background: #f7f8fa; color: #ccc; }
   .cal-day-num { font-size: 11px; font-weight: 700; }
-  .cal-count { font-size: 15px; font-weight: 800; align-self: flex-end; }
-  .cal-cell.out-of-range .cal-day-num { color: #ccc; }
+  .cal-count { font-size: 15px; font-weight: 800; float: right; }
+  table.cal-table td.cal-cell.out-of-range .cal-day-num { color: #ccc; }
 
   .legend { display: flex; align-items: center; gap: 6px; margin-top: 14px; font-size: 11px; color: #888; }
   .legend-swatch { width: 16px; height: 12px; border-radius: 3px; display: inline-block; }
@@ -633,26 +630,35 @@ geotab.addin.fleetUsageReport = function () {
       title.textContent = monthLabel;
       monthDiv.appendChild(title);
 
-      var grid = document.createElement("div");
-      grid.className = "cal-grid";
-      grid.style.display = "grid";
-      grid.style.gridTemplateColumns = "repeat(7, 1fr)";
-      grid.style.gap = "5px";
+      var table = document.createElement("table");
+      table.className = "cal-table";
+
+      var thead = document.createElement("thead");
+      var headRow = document.createElement("tr");
       WEEKDAY_LABELS.forEach(function (wd) {
-        var el = document.createElement("div");
-        el.className = "cal-weekday";
-        el.textContent = wd;
-        grid.appendChild(el);
+        var th = document.createElement("th");
+        th.className = "cal-weekday-th";
+        th.textContent = wd;
+        headRow.appendChild(th);
       });
+      thead.appendChild(headRow);
+      table.appendChild(thead);
+
+      var tbody = document.createElement("tbody");
+      var row = document.createElement("tr");
       for (var i = 0; i < firstWeekday; i++) {
-        var pad = document.createElement("div");
+        var pad = document.createElement("td");
         pad.className = "cal-cell empty";
-        grid.appendChild(pad);
+        row.appendChild(pad);
       }
       for (var day = 1; day <= daysInMonth; day++) {
+        if (row.children.length === 7) {
+          tbody.appendChild(row);
+          row = document.createElement("tr");
+        }
         var d = new Date(year, month, day);
         var key = toLocalDateKey(d);
-        var cell = document.createElement("div");
+        var cell = document.createElement("td");
         if (key < fromKey || key > toKey) {
           cell.className = "cal-cell out-of-range";
           cell.innerHTML = '<div class="cal-day-num">' + day + '</div>';
@@ -666,9 +672,17 @@ geotab.addin.fleetUsageReport = function () {
           cell.title = monthLabel.split(" ")[0] + " " + day + ": " + rec.count + " of " + totalVehicles + " out. Not out: " + notOutText;
           cell.innerHTML = '<div class="cal-day-num">' + day + '</div><div class="cal-count">' + rec.count + '</div>';
         }
-        grid.appendChild(cell);
+        row.appendChild(cell);
       }
-      monthDiv.appendChild(grid);
+      while (row.children.length < 7) {
+        var trailPad = document.createElement("td");
+        trailPad.className = "cal-cell empty";
+        row.appendChild(trailPad);
+      }
+      tbody.appendChild(row);
+      table.appendChild(tbody);
+
+      monthDiv.appendChild(table);
       container.appendChild(monthDiv);
       monthCursor.setMonth(monthCursor.getMonth() + 1);
     }
