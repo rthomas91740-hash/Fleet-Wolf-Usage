@@ -86,14 +86,17 @@
   }
   .panel h2 {
     font-size: 14px;
-    margin: 0 0 14px 0;
+    margin: 0 0 4px 0;
     color: #333;
+  }
+  .panel .panel-sub {
+    font-size: 11px;
+    color: #999;
+    margin-bottom: 14px;
   }
 
   /* Calendar */
-  .cal-month {
-    margin-bottom: 22px;
-  }
+  .cal-month { margin-bottom: 22px; }
   .cal-month:last-child { margin-bottom: 0; }
   .cal-month-title {
     font-size: 13px;
@@ -132,19 +135,9 @@
     z-index: 2;
   }
   .cal-cell.empty { background: transparent; }
-  .cal-cell.out-of-range {
-    background: #f7f8fa;
-    color: #ccc;
-  }
-  .cal-day-num {
-    font-size: 11px;
-    font-weight: 700;
-  }
-  .cal-count {
-    font-size: 15px;
-    font-weight: 800;
-    align-self: flex-end;
-  }
+  .cal-cell.out-of-range { background: #f7f8fa; color: #ccc; }
+  .cal-day-num { font-size: 11px; font-weight: 700; }
+  .cal-count { font-size: 15px; font-weight: 800; align-self: flex-end; }
   .cal-cell.out-of-range .cal-day-num { color: #ccc; }
 
   .legend {
@@ -184,7 +177,7 @@
     background: #eef0f3;
     border-radius: 4px;
     height: 8px;
-    width: 110px;
+    width: 90px;
     overflow: hidden;
     display: inline-block;
     vertical-align: middle;
@@ -211,6 +204,59 @@
   .rank-badge.gold { background: #ffd700; color: #7a5c00; }
   .rank-badge.silver { background: #d7d9dc; color: #555; }
   .rank-badge.bronze { background: #cd7f32; color: #fff; }
+
+  /* Vehicle x Day mileage grid */
+  .grid-scroll {
+    overflow-x: auto;
+    border: 1px solid #f0f1f3;
+    border-radius: 8px;
+  }
+  .mileage-grid {
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .mileage-grid th, .mileage-grid td {
+    padding: 6px 8px;
+    text-align: center;
+    border-bottom: 1px solid #f2f3f5;
+    border-right: 1px solid #f2f3f5;
+  }
+  .mileage-grid th.veh-col, .mileage-grid td.veh-col {
+    position: sticky;
+    left: 0;
+    background: #fff;
+    text-align: left;
+    font-weight: 600;
+    z-index: 1;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.04);
+    min-width: 130px;
+  }
+  .mileage-grid thead th {
+    background: #fafbfd;
+    color: #888;
+    font-weight: 700;
+    font-size: 9px;
+    text-transform: uppercase;
+    vertical-align: bottom;
+  }
+  .mileage-grid thead th.veh-col { background: #fafbfd; z-index: 2; }
+  .mileage-grid .day-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    height: 40px;
+    display: inline-block;
+  }
+  .mileage-grid td.mi-cell {
+    font-weight: 700;
+    min-width: 40px;
+  }
+  .mileage-grid td.mi-cell.zero {
+    color: #ccc;
+    font-weight: 400;
+    background: #fff !important;
+  }
   .hidden { display: none; }
 </style>
 </head>
@@ -238,15 +284,24 @@
 
     <div class="panel">
       <h2>Daily Calendar</h2>
+      <div class="panel-sub">Number of vehicles out each day</div>
       <div id="calendarContainer"></div>
       <div class="legend" id="legend"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Vehicle Activity &amp; Mileage</h2>
+      <div class="panel-sub" id="gridSubtitle">Which vehicle ran on which day, and how far</div>
+      <div class="grid-scroll">
+        <table class="mileage-grid" id="mileageGrid"></table>
+      </div>
     </div>
 
     <div class="panel">
       <h2>Per-Vehicle Utilization</h2>
       <table>
         <thead>
-          <tr><th>Vehicle</th><th>Days Out</th><th>% of Range</th></tr>
+          <tr><th>Vehicle</th><th>Days Out</th><th>% of Range</th><th>Total Miles</th></tr>
         </thead>
         <tbody id="vehicleTableBody"></tbody>
       </table>
@@ -262,6 +317,7 @@ geotab.addin.fleetUsageReport = function () {
   var elRunBtn = null;
   var elStatus = null;
   var apiRef = null;
+  var KM_TO_MI = 0.621371;
 
   var WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -272,6 +328,12 @@ geotab.addin.fleetUsageReport = function () {
     var m = String(d.getMonth() + 1).padStart(2, "0");
     var day = String(d.getDate()).padStart(2, "0");
     return y + "-" + m + "-" + day;
+  }
+
+  function formatDateShort(key) {
+    var parts = key.split("-");
+    var d = new Date(parts[0], parts[1] - 1, parts[2]);
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   }
 
   function dateRangeKeys(fromKey, toKey) {
@@ -298,26 +360,22 @@ geotab.addin.fleetUsageReport = function () {
     elFrom.value = toLocalDateKey(monthAgo);
   }
 
-  // color scale: 0% -> pale blue, 100% -> deep blue
   function colorForPct(pct) {
-    // pct 0..1
-    var lightness = 94 - (pct * 54); // 94% (near white) down to 40%
-    var saturation = 70;
-    var hue = 206;
-    return "hsl(" + hue + ", " + saturation + "%, " + lightness + "%)";
+    var lightness = 94 - (pct * 54);
+    return "hsl(206, 70%, " + lightness + "%)";
   }
+  function textColorForPct(pct) { return pct > 0.55 ? "#fff" : "#1b3a52"; }
 
-  function textColorForPct(pct) {
-    return pct > 0.55 ? "#fff" : "#1b3a52";
+  function colorForMileagePct(pct) {
+    // pct 0..1 relative to max mileage in the grid
+    var lightness = 92 - (pct * 47);
+    return "hsl(142, 55%, " + lightness + "%)";
   }
 
   // ---- data fetching ---------------------------------------------------
 
   function getActiveDevices(callback) {
-    apiRef.call("Get", {
-      typeName: "Device",
-      resultsLimit: 1000
-    }, function (devices) {
+    apiRef.call("Get", { typeName: "Device", resultsLimit: 1000 }, function (devices) {
       var now = new Date();
       var active = devices.filter(function (d) {
         var activeTo = d.activeTo ? new Date(d.activeTo) : null;
@@ -332,16 +390,29 @@ geotab.addin.fleetUsageReport = function () {
   function getTrips(fromISO, toISO, callback) {
     apiRef.call("Get", {
       typeName: "Trip",
-      search: {
-        fromDate: fromISO,
-        toDate: toISO
-      },
+      search: { fromDate: fromISO, toDate: toISO },
       resultsLimit: 50000
     }, function (trips) {
       callback(trips);
     }, function (err) {
       setStatus("Error loading trips: " + (err && err.message ? err.message : err), true);
     });
+  }
+
+  function getIsMetric(callback) {
+    apiRef.getSession(function (session) {
+      if (!session || !session.userName) { callback(false); return; }
+      apiRef.call("Get", {
+        typeName: "User",
+        search: { name: session.userName }
+      }, function (users) {
+        if (users && users.length && typeof users[0].isMetric === "boolean") {
+          callback(users[0].isMetric);
+        } else {
+          callback(false);
+        }
+      }, function () { callback(false); });
+    }, function () { callback(false); });
   }
 
   // ---- rendering ---------------------------------------------------
@@ -352,8 +423,6 @@ geotab.addin.fleetUsageReport = function () {
 
     var start = new Date(fromKey + "T00:00:00");
     var end = new Date(toKey + "T00:00:00");
-
-    // iterate month by month
     var monthCursor = new Date(start.getFullYear(), start.getMonth(), 1);
     var lastMonth = new Date(end.getFullYear(), end.getMonth(), 1);
 
@@ -366,7 +435,6 @@ geotab.addin.fleetUsageReport = function () {
 
       var monthDiv = document.createElement("div");
       monthDiv.className = "cal-month";
-
       var title = document.createElement("div");
       title.className = "cal-month-title";
       title.textContent = monthLabel;
@@ -374,25 +442,21 @@ geotab.addin.fleetUsageReport = function () {
 
       var grid = document.createElement("div");
       grid.className = "cal-grid";
-
       WEEKDAY_LABELS.forEach(function (wd) {
         var el = document.createElement("div");
         el.className = "cal-weekday";
         el.textContent = wd;
         grid.appendChild(el);
       });
-
       for (var i = 0; i < firstWeekday; i++) {
         var pad = document.createElement("div");
         pad.className = "cal-cell empty";
         grid.appendChild(pad);
       }
-
       for (var day = 1; day <= daysInMonth; day++) {
         var d = new Date(year, month, day);
         var key = toLocalDateKey(d);
         var cell = document.createElement("div");
-
         if (key < fromKey || key > toKey) {
           cell.className = "cal-cell out-of-range";
           cell.innerHTML = '<div class="cal-day-num">' + day + '</div>';
@@ -404,20 +468,15 @@ geotab.addin.fleetUsageReport = function () {
           cell.style.color = textColorForPct(pct);
           var notOutText = rec.notOutNames.length ? rec.notOutNames.join(", ") : "All vehicles out";
           cell.title = monthLabel.split(" ")[0] + " " + day + ": " + rec.count + " of " + totalVehicles + " out. Not out: " + notOutText;
-          cell.innerHTML =
-            '<div class="cal-day-num">' + day + '</div>' +
-            '<div class="cal-count">' + rec.count + '</div>';
+          cell.innerHTML = '<div class="cal-day-num">' + day + '</div><div class="cal-count">' + rec.count + '</div>';
         }
         grid.appendChild(cell);
       }
-
       monthDiv.appendChild(grid);
       container.appendChild(monthDiv);
-
       monthCursor.setMonth(monthCursor.getMonth() + 1);
     }
 
-    // legend
     var legend = document.getElementById("legend");
     legend.innerHTML = "Fewer vehicles out ";
     [0, 0.25, 0.5, 0.75, 1].forEach(function (p) {
@@ -429,37 +488,102 @@ geotab.addin.fleetUsageReport = function () {
     legend.innerHTML += " More vehicles out";
   }
 
-  function render(devices, trips, fromKey, toKey) {
-    var deviceById = {};
-    devices.forEach(function (d) { deviceById[d.id] = d.name; });
+  function buildMileageGrid(devices, deviceDayData, dayKeys, isMetric) {
+    var unitLabel = isMetric ? "km" : "mi";
+    document.getElementById("gridSubtitle").textContent =
+      "Which vehicle ran on which day, and how far (" + unitLabel + "). Scroll right for more dates.";
 
-    var deviceDayMap = {};
-    devices.forEach(function (d) { deviceDayMap[d.id] = new Set(); });
+    var table = document.getElementById("mileageGrid");
+    table.innerHTML = "";
+
+    var maxMiles = 0;
+    devices.forEach(function (d) {
+      dayKeys.forEach(function (key) {
+        var rec = deviceDayData[d.id][key];
+        var miles = isMetric ? rec.distanceKm : rec.distanceKm * KM_TO_MI;
+        if (miles > maxMiles) { maxMiles = miles; }
+      });
+    });
+
+    var thead = document.createElement("thead");
+    var headRow = document.createElement("tr");
+    var vehTh = document.createElement("th");
+    vehTh.className = "veh-col";
+    vehTh.textContent = "Vehicle";
+    headRow.appendChild(vehTh);
+    dayKeys.forEach(function (key) {
+      var th = document.createElement("th");
+      th.innerHTML = '<span class="day-label">' + formatDateShort(key) + '</span>';
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    var tbody = document.createElement("tbody");
+    devices.forEach(function (d) {
+      var tr = document.createElement("tr");
+      var vehTd = document.createElement("td");
+      vehTd.className = "veh-col";
+      vehTd.textContent = d.name;
+      tr.appendChild(vehTd);
+
+      dayKeys.forEach(function (key) {
+        var rec = deviceDayData[d.id][key];
+        var miles = isMetric ? rec.distanceKm : rec.distanceKm * KM_TO_MI;
+        var td = document.createElement("td");
+        if (miles <= 0.05) {
+          td.className = "mi-cell zero";
+          td.textContent = "–";
+        } else {
+          var pct = maxMiles ? miles / maxMiles : 0;
+          td.className = "mi-cell";
+          td.style.background = colorForMileagePct(pct);
+          td.textContent = miles >= 10 ? Math.round(miles) : miles.toFixed(1);
+          td.title = d.name + " — " + formatDateShort(key) + ": " + miles.toFixed(1) + " " + unitLabel + " (" + rec.count + " trip" + (rec.count === 1 ? "" : "s") + ")";
+        }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+  }
+
+  function render(devices, trips, fromKey, toKey, isMetric) {
+    var deviceDayData = {};
+    var dayKeys = dateRangeKeys(fromKey, toKey);
+
+    devices.forEach(function (d) {
+      deviceDayData[d.id] = {};
+      dayKeys.forEach(function (key) {
+        deviceDayData[d.id][key] = { count: 0, distanceKm: 0 };
+      });
+    });
 
     trips.forEach(function (trip) {
       if (!trip.device || !trip.device.id) { return; }
-      if (!(trip.device.id in deviceDayMap)) { return; }
+      if (!(trip.device.id in deviceDayData)) { return; }
       var start = trip.start ? new Date(trip.start) : null;
       if (!start) { return; }
       var key = toLocalDateKey(start);
-      deviceDayMap[trip.device.id].add(key);
+      if (!(key in deviceDayData[trip.device.id])) { return; }
+      var entry = deviceDayData[trip.device.id][key];
+      entry.count += 1;
+      entry.distanceKm += (typeof trip.distance === "number" ? trip.distance : 0);
     });
 
-    var dayKeys = dateRangeKeys(fromKey, toKey);
+    // fleet-wide daily calendar data
     var dailyByKey = {};
     dayKeys.forEach(function (key) {
       var count = 0;
-      var outNames = [];
       var notOutNames = [];
       devices.forEach(function (d) {
-        if (deviceDayMap[d.id].has(key)) {
+        if (deviceDayData[d.id][key].count > 0) {
           count++;
-          outNames.push(d.name);
         } else {
           notOutNames.push(d.name);
         }
       });
-      dailyByKey[key] = { count: count, outNames: outNames, notOutNames: notOutNames };
+      dailyByKey[key] = { count: count, notOutNames: notOutNames };
     });
 
     var totalVehicles = devices.length;
@@ -470,14 +594,13 @@ geotab.addin.fleetUsageReport = function () {
 
     var summaryEl = document.getElementById("summary");
     summaryEl.innerHTML = "";
-    var stats = [
+    [
       { label: "Total Vehicles", value: totalVehicles },
       { label: "Days in Range", value: dayKeys.length },
       { label: "Avg Vehicles Out / Day", value: avg.toFixed(1) },
       { label: "Busiest Day", value: max },
       { label: "Quietest Day", value: min }
-    ];
-    stats.forEach(function (s) {
+    ].forEach(function (s) {
       var div = document.createElement("div");
       div.className = "stat";
       div.innerHTML = '<div class="value">' + s.value + '</div><div class="label">' + s.label + '</div>';
@@ -485,11 +608,20 @@ geotab.addin.fleetUsageReport = function () {
     });
 
     buildCalendar(dailyByKey, fromKey, toKey, totalVehicles);
+    buildMileageGrid(devices, deviceDayData, dayKeys, isMetric);
 
+    var unitLabel = isMetric ? "km" : "mi";
     var vehicleStats = devices.map(function (d) {
-      var daysOut = deviceDayMap[d.id].size;
+      var daysOut = 0;
+      var totalKm = 0;
+      dayKeys.forEach(function (key) {
+        var entry = deviceDayData[d.id][key];
+        if (entry.count > 0) { daysOut++; }
+        totalKm += entry.distanceKm;
+      });
+      var totalMiles = isMetric ? totalKm : totalKm * KM_TO_MI;
       var pct = dayKeys.length ? (daysOut / dayKeys.length) * 100 : 0;
-      return { name: d.name, daysOut: daysOut, pct: pct };
+      return { name: d.name, daysOut: daysOut, pct: pct, totalMiles: totalMiles };
     }).sort(function (a, b) { return b.pct - a.pct; });
 
     var vehicleBody = document.getElementById("vehicleTableBody");
@@ -506,7 +638,8 @@ geotab.addin.fleetUsageReport = function () {
         "<td>" +
           '<span class="util-bar-bg"><span class="util-bar-fill" style="width:' + v.pct.toFixed(0) + '%"></span></span>' +
           v.pct.toFixed(0) + "%" +
-        "</td>";
+        "</td>" +
+        "<td>" + Math.round(v.totalMiles).toLocaleString() + " " + unitLabel + "</td>";
       vehicleBody.appendChild(tr);
     });
 
@@ -517,14 +650,8 @@ geotab.addin.fleetUsageReport = function () {
     var fromKey = elFrom.value;
     var toKey = elTo.value;
 
-    if (!fromKey || !toKey) {
-      setStatus("Please choose both a from and to date.", true);
-      return;
-    }
-    if (fromKey > toKey) {
-      setStatus("From date must be before to date.", true);
-      return;
-    }
+    if (!fromKey || !toKey) { setStatus("Please choose both a from and to date.", true); return; }
+    if (fromKey > toKey) { setStatus("From date must be before to date.", true); return; }
 
     elRunBtn.disabled = true;
     setStatus("Loading vehicles and trips…");
@@ -538,10 +665,12 @@ geotab.addin.fleetUsageReport = function () {
         elRunBtn.disabled = false;
         return;
       }
-      getTrips(fromISO, toISO, function (trips) {
-        setStatus("");
-        render(devices, trips, fromKey, toKey);
-        elRunBtn.disabled = false;
+      getIsMetric(function (isMetric) {
+        getTrips(fromISO, toISO, function (trips) {
+          setStatus("");
+          render(devices, trips, fromKey, toKey, isMetric);
+          elRunBtn.disabled = false;
+        });
       });
     });
   }
