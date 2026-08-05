@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Fleet Usage Report</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    padding: 16px;
+    background: #f5f6f8;
+    color: #222;
+  }
+  h1 {
+    font-size: 20px;
+    margin: 0 0 4px 0;
+  }
+  .subtitle {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .controls {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 12px; color: #555; font-weight: 600; }
+  .field input {
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  button {
+    background: #0072c6;
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { background: #005a9e; }
+  button:disabled { background: #99c2e0; cursor: default; }
+  .status {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 12px;
+    min-height: 18px;
+  }
+  .status.error { color: #c0392b; }
+  .summary {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 12px 18px;
+    min-width: 130px;
+  }
+  .stat .value { font-size: 22px; font-weight: 700; color: #0072c6; }
+  .stat .label { font-size: 11px; color: #777; text-transform: uppercase; letter-spacing: 0.03em; }
+  .panel {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 18px;
+  }
+  .panel h2 {
+    font-size: 14px;
+    margin: 0 0 12px 0;
+    color: #333;
+  }
+  .chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 180px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #eee;
+  }
+  .bar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 22px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .bar {
+    width: 16px;
+    background: #0072c6;
+    border-radius: 2px 2px 0 0;
+    min-height: 2px;
+  }
+  .bar-count {
+    font-size: 9px;
+    color: #555;
+    margin-bottom: 2px;
+  }
+  .bar-date {
+    font-size: 8px;
+    color: #999;
+    margin-top: 4px;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    height: 46px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  th, td {
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 1px solid #eee;
+  }
+  th {
+    color: #666;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+  tr:hover td { background: #fafbfc; }
+  .not-out {
+    color: #999;
+    font-size: 11px;
+  }
+  .util-bar-bg {
+    background: #eee;
+    border-radius: 3px;
+    height: 8px;
+    width: 100px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .util-bar-fill {
+    background: #27ae60;
+    height: 100%;
+  }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+  <h1>Fleet Usage Report</h1>
+  <div class="subtitle">Vehicles in use per day, based on trip activity</div>
+
+  <div class="controls">
+    <div class="field">
+      <label for="fromDate">From</label>
+      <input type="date" id="fromDate">
+    </div>
+    <div class="field">
+      <label for="toDate">To</label>
+      <input type="date" id="toDate">
+    </div>
+    <button id="runBtn">Run Report</button>
+  </div>
+
+  <div class="status" id="status"></div>
+
+  <div id="results" class="hidden">
+    <div class="summary" id="summary"></div>
+
+    <div class="panel">
+      <h2>Vehicles Out Per Day</h2>
+      <div class="chart" id="chart"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Daily Detail</h2>
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Vehicles Out</th><th>Not Out</th></tr>
+        </thead>
+        <tbody id="dailyTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h2>Per-Vehicle Utilization</h2>
+      <table>
+        <thead>
+          <tr><th>Vehicle</th><th>Days Out</th><th>% of Range</th></tr>
+        </thead>
+        <tbody id="vehicleTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+<script>
+geotab.addin.fleetUsageReport = function () {
+  "use strict";
+
+  var elFrom = null;
+  var elTo = null;
+  var elRunBtn = null;
+  var elStatus = null;
+  var elResults = null;
+  var apiRef = null;
+
+  // ---- helpers -------------------------------------------------------
+
+  function toLocalDateKey(d) {
+    // YYYY-MM-DD in local time
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, "0");
+    var day = String(d.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + day;
+  }
+
+  function formatDateShort(key) {
+    var parts = key.split("-");
+    var d = new Date(parts[0], parts[1] - 1, parts[2]);
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+
+  function dateRangeKeys(fromKey, toKey) {
+    var keys = [];
+    var cur = new Date(fromKey + "T00:00:00");
+    var end = new Date(toKey + "T00:00:00");
+    while (cur <= end) {
+      keys.push(toLocalDateKey(cur));
+      cur.setDate(cur.getDate() + 1);
+    }
+    return keys;
+  }
+
+  function setStatus(msg, isError) {
+    elStatus.textContent = msg || "";
+    elStatus.className = "status" + (isError ? " error" : "");
+  }
+
+  function defaultDates() {
+    var today = new Date();
+    var monthAgo = new Date();
+    monthAgo.setDate(today.getDate() - 29);
+    elTo.value = toLocalDateKey(today);
+    elFrom.value = toLocalDateKey(monthAgo);
+  }
+
+  // ---- data fetching ---------------------------------------------------
+
+  function getActiveDevices(callback) {
+    apiRef.call("Get", {
+      typeName: "Device",
+      resultsLimit: 1000
+    }, function (devices) {
+      var now = new Date();
+      var active = devices.filter(function (d) {
+        var activeTo = d.activeTo ? new Date(d.activeTo) : null;
+        // Geotab uses a far-future date for "no end date"; treat far-future or null as active
+        return !activeTo || activeTo > now;
+      });
+      callback(active);
+    }, function (err) {
+      setStatus("Error loading devices: " + (err && err.message ? err.message : err), true);
+    });
+  }
+
+  function getTrips(fromISO, toISO, callback) {
+    apiRef.call("Get", {
+      typeName: "Trip",
+      search: {
+        fromDate: fromISO,
+        toDate: toISO
+      },
+      resultsLimit: 50000
+    }, function (trips) {
+      callback(trips);
+    }, function (err) {
+      setStatus("Error loading trips: " + (err && err.message ? err.message : err), true);
+    });
+  }
+
+  // ---- rendering ---------------------------------------------------
+
+  function render(devices, trips, fromKey, toKey) {
+    var deviceById = {};
+    devices.forEach(function (d) { deviceById[d.id] = d.name; });
+
+    // deviceId -> Set of date keys it had a trip
+    var deviceDayMap = {};
+    devices.forEach(function (d) { deviceDayMap[d.id] = new Set(); });
+
+    trips.forEach(function (trip) {
+      if (!trip.device || !trip.device.id) { return; }
+      if (!(trip.device.id in deviceDayMap)) { return; } // trip from a device outside our active list
+      var start = trip.start ? new Date(trip.start) : null;
+      if (!start) { return; }
+      var key = toLocalDateKey(start);
+      deviceDayMap[trip.device.id].add(key);
+    });
+
+    var dayKeys = dateRangeKeys(fromKey, toKey);
+    var dailyCounts = dayKeys.map(function (key) {
+      var count = 0;
+      var outNames = [];
+      var notOutNames = [];
+      devices.forEach(function (d) {
+        if (deviceDayMap[d.id].has(key)) {
+          count++;
+          outNames.push(d.name);
+        } else {
+          notOutNames.push(d.name);
+        }
+      });
+      return { key: key, count: count, outNames: outNames, notOutNames: notOutNames };
+    });
+
+    // ---- summary stats ----
+    var totalVehicles = devices.length;
+    var counts = dailyCounts.map(function (r) { return r.count; });
+    var avg = counts.length ? (counts.reduce(function (a, b) { return a + b; }, 0) / counts.length) : 0;
+    var max = counts.length ? Math.max.apply(null, counts) : 0;
+    var min = counts.length ? Math.min.apply(null, counts) : 0;
+
+    var summaryEl = document.getElementById("summary");
+    summaryEl.innerHTML = "";
+    var stats = [
+      { label: "Total Vehicles", value: totalVehicles },
+      { label: "Days in Range", value: dayKeys.length },
+      { label: "Avg Vehicles Out / Day", value: avg.toFixed(1) },
+      { label: "Busiest Day", value: max },
+      { label: "Quietest Day", value: min }
+    ];
+    stats.forEach(function (s) {
+      var div = document.createElement("div");
+      div.className = "stat";
+      div.innerHTML = '<div class="value">' + s.value + '</div><div class="label">' + s.label + '</div>';
+      summaryEl.appendChild(div);
+    });
+
+    // ---- chart ----
+    var chartEl = document.getElementById("chart");
+    chartEl.innerHTML = "";
+    dailyCounts.forEach(function (r) {
+      var pct = totalVehicles ? (r.count / totalVehicles) * 150 : 0;
+      var wrap = document.createElement("div");
+      wrap.className = "bar-wrap";
+      wrap.title = r.key + ": " + r.count + " of " + totalVehicles + " out";
+      wrap.innerHTML =
+        '<div class="bar-count">' + r.count + '</div>' +
+        '<div class="bar" style="height:' + Math.max(pct, 2) + 'px"></div>' +
+        '<div class="bar-date">' + formatDateShort(r.key) + '</div>';
+      chartEl.appendChild(wrap);
+    });
+
+    // ---- daily table ----
+    var dailyBody = document.getElementById("dailyTableBody");
+    dailyBody.innerHTML = "";
+    dailyCounts.slice().reverse().forEach(function (r) {
+      var tr = document.createElement("tr");
+      var notOutText = r.notOutNames.length ? r.notOutNames.join(", ") : "—";
+      tr.innerHTML =
+        "<td>" + formatDateShort(r.key) + "</td>" +
+        "<td>" + r.count + " / " + totalVehicles + "</td>" +
+        '<td class="not-out">' + notOutText + "</td>";
+      dailyBody.appendChild(tr);
+    });
+
+    // ---- per-vehicle utilization ----
+    var vehicleStats = devices.map(function (d) {
+      var daysOut = deviceDayMap[d.id].size;
+      var pct = dayKeys.length ? (daysOut / dayKeys.length) * 100 : 0;
+      return { name: d.name, daysOut: daysOut, pct: pct };
+    }).sort(function (a, b) { return b.pct - a.pct; });
+
+    var vehicleBody = document.getElementById("vehicleTableBody");
+    vehicleBody.innerHTML = "";
+    vehicleStats.forEach(function (v) {
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>" + v.name + "</td>" +
+        "<td>" + v.daysOut + " / " + dayKeys.length + "</td>" +
+        "<td>" +
+          '<span class="util-bar-bg"><span class="util-bar-fill" style="width:' + v.pct.toFixed(0) + '%"></span></span>' +
+          v.pct.toFixed(0) + "%" +
+        "</td>";
+      vehicleBody.appendChild(tr);
+    });
+
+    document.getElementById("results").classList.remove("hidden");
+  }
+
+  function runReport() {
+    var fromKey = elFrom.value;
+    var toKey = elTo.value;
+
+    if (!fromKey || !toKey) {
+      setStatus("Please choose both a from and to date.", true);
+      return;
+    }
+    if (fromKey > toKey) {
+      setStatus("From date must be before to date.", true);
+      return;
+    }
+
+    elRunBtn.disabled = true;
+    setStatus("Loading vehicles and trips…");
+
+    var fromISO = new Date(fromKey + "T00:00:00").toISOString();
+    var toISO = new Date(toKey + "T23:59:59").toISOString();
+
+    getActiveDevices(function (devices) {
+      if (!devices.length) {
+        setStatus("No active devices found on this database.", true);
+        elRunBtn.disabled = false;
+        return;
+      }
+      getTrips(fromISO, toISO, function (trips) {
+        setStatus("");
+        render(devices, trips, fromKey, toKey);
+        elRunBtn.disabled = false;
+      });
+    });
+  }
+
+  return {
+    initialize: function (api, state, callback) {
+      apiRef = api;
+      elFrom = document.getElementById("fromDate");
+      elTo = document.getElementById("toDate");
+      elRunBtn = document.getElementById("runBtn");
+      elStatus = document.getElementById("status");
+      elResults = document.getElementById("results");
+
+      defaultDates();
+      elRunBtn.addEventListener("click", runReport);
+
+      // Auto-run on first load with default range
+      runReport();
+
+      callback();
+    },
+    focus: function () {
+      // no-op: report only refreshes on button click
+    },
+    blur: function () {
+      // no-op
+    }
+  };
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "Fleet Usage Report",
+  "supportEmail": "support@fleetwolf.com",
+  "version": "1.0.0",
+  "items": [
+    {
+      "url": "https://YOUR-GITHUB-USERNAME.github.io/fleet-usage-addin/index.html",
+      "path": "ActivityLink/",
+      "menuName": {
+        "en": "Fleet Usage Report"
+      },
+      "icon": "https://cdn.jsdelivr.net/npm/@geotab/geotab-icons/icons/vehicle.svg"
+    }
+  ]
+}
