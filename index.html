@@ -12,16 +12,8 @@
     background: #f2f4f7;
     color: #222;
   }
-  h1 {
-    font-size: 22px;
-    margin: 0 0 2px 0;
-    letter-spacing: -0.01em;
-  }
-  .subtitle {
-    color: #667;
-    font-size: 13px;
-    margin-bottom: 18px;
-  }
+  h1 { font-size: 22px; margin: 0 0 2px 0; letter-spacing: -0.01em; }
+  .subtitle { color: #667; font-size: 13px; margin-bottom: 18px; }
   .controls {
     background: linear-gradient(135deg, #0072c6, #00a8e8);
     border-radius: 10px;
@@ -54,19 +46,9 @@
   }
   button:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
   button:disabled { background: #cfe6f7; color: #7fa; cursor: default; transform: none; box-shadow: none; }
-  .status {
-    font-size: 13px;
-    color: #666;
-    margin-bottom: 12px;
-    min-height: 18px;
-  }
+  .status { font-size: 13px; color: #666; margin-bottom: 12px; min-height: 18px; }
   .status.error { color: #c0392b; font-weight: 600; }
-  .summary {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
+  .summary { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
   .stat {
     background: #fff;
     border-radius: 10px;
@@ -84,31 +66,62 @@
     margin-bottom: 20px;
     box-shadow: 0 2px 8px rgba(20,30,60,0.06);
   }
-  .panel h2 {
-    font-size: 14px;
-    margin: 0 0 4px 0;
-    color: #333;
+  .panel h2 { font-size: 14px; margin: 0 0 4px 0; color: #333; }
+  .panel .panel-sub { font-size: 11px; color: #999; margin-bottom: 14px; }
+
+  /* Trend chart */
+  .trend-svg-wrap { width: 100%; overflow-x: auto; }
+  .trend-line {
+    fill: none;
+    stroke: #0072c6;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 2000;
+    stroke-dashoffset: 2000;
+    animation: drawline 1.4s ease forwards;
   }
-  .panel .panel-sub {
-    font-size: 11px;
-    color: #999;
-    margin-bottom: 14px;
+  @keyframes drawline { to { stroke-dashoffset: 0; } }
+  .trend-area { opacity: 0; animation: fadein 0.9s ease 0.5s forwards; }
+  @keyframes fadein { to { opacity: 1; } }
+  .trend-dot { fill: #0072c6; opacity: 0; animation: fadein 0.4s ease 1.2s forwards; }
+  .trend-dot:hover { r: 5; cursor: pointer; }
+
+  /* Insights */
+  .insight-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .insight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #f7f9fc;
+    font-size: 12.5px;
+    line-height: 1.5;
   }
+  .insight-item.warn { background: #fff6ec; }
+  .insight-icon {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    color: #fff;
+    background: #0072c6;
+  }
+  .insight-item.warn .insight-icon { background: #e08a2c; }
+  .insight-item.good .insight-icon { background: #27ae60; }
+  .insight-text b { color: #222; }
 
   /* Calendar */
   .cal-month { margin-bottom: 22px; }
   .cal-month:last-child { margin-bottom: 0; }
-  .cal-month-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #0072c6;
-    margin-bottom: 8px;
-  }
-  .cal-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
-  }
+  .cal-month-title { font-size: 13px; font-weight: 700; color: #0072c6; margin-bottom: 8px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
   .cal-weekday {
     font-size: 10px;
     font-weight: 700;
@@ -129,50 +142,21 @@
     transition: transform 0.1s ease, box-shadow 0.1s ease;
     cursor: default;
   }
-  .cal-cell.has-data:hover {
-    transform: scale(1.06);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
-    z-index: 2;
-  }
+  .cal-cell.has-data:hover { transform: scale(1.06); box-shadow: 0 4px 12px rgba(0,0,0,0.18); z-index: 2; }
   .cal-cell.empty { background: transparent; }
   .cal-cell.out-of-range { background: #f7f8fa; color: #ccc; }
   .cal-day-num { font-size: 11px; font-weight: 700; }
   .cal-count { font-size: 15px; font-weight: 800; align-self: flex-end; }
   .cal-cell.out-of-range .cal-day-num { color: #ccc; }
 
-  .legend {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 14px;
-    font-size: 11px;
-    color: #888;
-  }
-  .legend-swatch {
-    width: 16px;
-    height: 12px;
-    border-radius: 3px;
-    display: inline-block;
-  }
+  .legend { display: flex; align-items: center; gap: 6px; margin-top: 14px; font-size: 11px; color: #888; }
+  .legend-swatch { width: 16px; height: 12px; border-radius: 3px; display: inline-block; }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-  }
-  th, td {
-    text-align: left;
-    padding: 7px 8px;
-    border-bottom: 1px solid #f0f1f3;
-  }
-  th {
-    color: #888;
-    font-weight: 700;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid #f0f1f3; }
+  th { color: #888; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
   tr:hover td { background: #fafbfd; }
+  tr.row-hidden { display: none; }
   .util-bar-bg {
     background: #eef0f3;
     border-radius: 4px;
@@ -183,11 +167,7 @@
     vertical-align: middle;
     margin-right: 8px;
   }
-  .util-bar-fill {
-    background: linear-gradient(90deg, #27ae60, #2ecc71);
-    height: 100%;
-    border-radius: 4px;
-  }
+  .util-bar-fill { background: linear-gradient(90deg, #27ae60, #2ecc71); height: 100%; border-radius: 4px; }
   .rank-badge {
     display: inline-block;
     width: 18px;
@@ -205,18 +185,34 @@
   .rank-badge.silver { background: #d7d9dc; color: #555; }
   .rank-badge.bronze { background: #cd7f32; color: #fff; }
 
+  /* Filter bar */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .filter-bar input[type="text"] {
+    padding: 7px 10px;
+    border: 1px solid #dde1e6;
+    border-radius: 6px;
+    font-size: 12px;
+    min-width: 180px;
+  }
+  .filter-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #555;
+    cursor: pointer;
+  }
+  .filter-count { font-size: 11px; color: #999; margin-left: auto; }
+
   /* Vehicle x Day mileage grid */
-  .grid-scroll {
-    overflow-x: auto;
-    border: 1px solid #f0f1f3;
-    border-radius: 8px;
-  }
-  .mileage-grid {
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: 11px;
-    white-space: nowrap;
-  }
+  .grid-scroll { overflow-x: auto; border: 1px solid #f0f1f3; border-radius: 8px; }
+  .mileage-grid { border-collapse: separate; border-spacing: 0; font-size: 11px; white-space: nowrap; }
   .mileage-grid th, .mileage-grid td {
     padding: 6px 8px;
     text-align: center;
@@ -248,15 +244,9 @@
     height: 40px;
     display: inline-block;
   }
-  .mileage-grid td.mi-cell {
-    font-weight: 700;
-    min-width: 40px;
-  }
-  .mileage-grid td.mi-cell.zero {
-    color: #ccc;
-    font-weight: 400;
-    background: #fff !important;
-  }
+  .mileage-grid td.mi-cell { font-weight: 700; min-width: 40px; }
+  .mileage-grid td.mi-cell.zero { color: #ccc; font-weight: 400; background: #fff !important; }
+  .mileage-grid td.mi-cell.anomaly { outline: 2px solid #e08a2c; outline-offset: -2px; }
   .hidden { display: none; }
 </style>
 </head>
@@ -283,6 +273,18 @@
     <div class="summary" id="summary"></div>
 
     <div class="panel">
+      <h2>Fleet Usage Trend</h2>
+      <div class="panel-sub">Vehicles out per day across the selected range</div>
+      <div class="trend-svg-wrap" id="trendChartContainer"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Insights</h2>
+      <div class="panel-sub">Automatically generated from this report's data</div>
+      <ul class="insight-list" id="insightsList"></ul>
+    </div>
+
+    <div class="panel">
       <h2>Daily Calendar</h2>
       <div class="panel-sub">Number of vehicles out each day</div>
       <div id="calendarContainer"></div>
@@ -292,6 +294,14 @@
     <div class="panel">
       <h2>Vehicle Activity &amp; Mileage</h2>
       <div class="panel-sub" id="gridSubtitle">Which vehicle ran on which day, and how far</div>
+      <div class="filter-bar">
+        <input type="text" id="vehicleFilter" placeholder="Search vehicle name…">
+        <label class="filter-toggle">
+          <input type="checkbox" id="hideLowUsage">
+          Hide vehicles used &lt; 10% of the time
+        </label>
+        <span class="filter-count" id="filterCount"></span>
+      </div>
       <div class="grid-scroll">
         <table class="mileage-grid" id="mileageGrid"></table>
       </div>
@@ -318,6 +328,7 @@ geotab.addin.fleetUsageReport = function () {
   var elStatus = null;
   var apiRef = null;
   var KM_TO_MI = 0.621371;
+  var lastVehicleStatsByName = {}; // name -> pct, for filter toggle on both tables
 
   var WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -367,7 +378,6 @@ geotab.addin.fleetUsageReport = function () {
   function textColorForPct(pct) { return pct > 0.55 ? "#fff" : "#1b3a52"; }
 
   function colorForMileagePct(pct) {
-    // pct 0..1 relative to max mileage in the grid
     var lightness = 92 - (pct * 47);
     return "hsl(142, 55%, " + lightness + "%)";
   }
@@ -411,7 +421,192 @@ geotab.addin.fleetUsageReport = function () {
     });
   }
 
-  // ---- rendering ---------------------------------------------------
+  // ---- rendering: trend chart ---------------------------------------------------
+
+  function buildTrendChart(dayKeys, counts, totalVehicles) {
+    var container = document.getElementById("trendChartContainer");
+    container.innerHTML = "";
+    if (!dayKeys.length) { return; }
+
+    var width = Math.max(600, dayKeys.length * 26);
+    var height = 160;
+    var padTop = 14, padBottom = 24, padLeft = 6, padRight = 6;
+    var plotH = height - padTop - padBottom;
+    var maxVal = Math.max(totalVehicles, 1);
+
+    var stepX = dayKeys.length > 1 ? (width - padLeft - padRight) / (dayKeys.length - 1) : 0;
+    var points = counts.map(function (c, i) {
+      var x = padLeft + i * stepX;
+      var y = padTop + plotH - (c / maxVal) * plotH;
+      return { x: x, y: y, c: c, key: dayKeys[i] };
+    });
+
+    var linePath = points.map(function (p, i) { return (i === 0 ? "M" : "L") + p.x.toFixed(1) + "," + p.y.toFixed(1); }).join(" ");
+    var areaPath = linePath +
+      " L" + points[points.length - 1].x.toFixed(1) + "," + (padTop + plotH) +
+      " L" + points[0].x.toFixed(1) + "," + (padTop + plotH) + " Z";
+
+    var showEveryNth = Math.ceil(dayKeys.length / 12);
+
+    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+
+    var defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    var grad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+    grad.setAttribute("id", "trendGradient");
+    grad.setAttribute("x1", "0"); grad.setAttribute("y1", "0");
+    grad.setAttribute("x2", "0"); grad.setAttribute("y2", "1");
+    var stop1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    stop1.setAttribute("offset", "0%"); stop1.setAttribute("stop-color", "#0072c6"); stop1.setAttribute("stop-opacity", "0.35");
+    var stop2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    stop2.setAttribute("offset", "100%"); stop2.setAttribute("stop-color", "#0072c6"); stop2.setAttribute("stop-opacity", "0.02");
+    grad.appendChild(stop1); grad.appendChild(stop2);
+    defs.appendChild(grad);
+    svg.appendChild(defs);
+
+    var area = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    area.setAttribute("d", areaPath);
+    area.setAttribute("fill", "url(#trendGradient)");
+    area.setAttribute("class", "trend-area");
+    svg.appendChild(area);
+
+    var line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    line.setAttribute("d", linePath);
+    line.setAttribute("class", "trend-line");
+    svg.appendChild(line);
+
+    points.forEach(function (p, i) {
+      var dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      dot.setAttribute("cx", p.x); dot.setAttribute("cy", p.y); dot.setAttribute("r", "3");
+      dot.setAttribute("class", "trend-dot");
+      var title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+      title.textContent = formatDateShort(p.key) + ": " + p.c + " of " + totalVehicles + " vehicles out";
+      dot.appendChild(title);
+      svg.appendChild(dot);
+
+      if (i % showEveryNth === 0 || i === points.length - 1) {
+        var label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.setAttribute("x", p.x);
+        label.setAttribute("y", height - 6);
+        label.setAttribute("text-anchor", "middle");
+        label.setAttribute("font-size", "9");
+        label.setAttribute("fill", "#999");
+        label.textContent = formatDateShort(p.key);
+        svg.appendChild(label);
+      }
+    });
+
+    container.appendChild(svg);
+  }
+
+  // ---- rendering: insights ---------------------------------------------------
+
+  function buildInsights(devices, deviceDayData, dayKeys, vehicleStats, unitLabel) {
+    var list = document.getElementById("insightsList");
+    list.innerHTML = "";
+    var insights = [];
+
+    if (!dayKeys.length || !devices.length) {
+      list.innerHTML = '<li class="insight-item"><span class="insight-icon">i</span><span class="insight-text">Not enough data to generate insights for this range.</span></li>';
+      return;
+    }
+
+    // Trend: first half vs second half of range
+    var mid = Math.floor(dayKeys.length / 2);
+    var firstHalf = dayKeys.slice(0, mid);
+    var secondHalf = dayKeys.slice(mid);
+    function avgOutForKeys(keys) {
+      if (!keys.length) { return 0; }
+      var total = 0;
+      keys.forEach(function (key) {
+        devices.forEach(function (d) {
+          if (deviceDayData[d.id][key].count > 0) { total++; }
+        });
+      });
+      return total / keys.length;
+    }
+    if (firstHalf.length && secondHalf.length) {
+      var avg1 = avgOutForKeys(firstHalf);
+      var avg2 = avgOutForKeys(secondHalf);
+      var diff = avg2 - avg1;
+      var pctChange = avg1 ? (diff / avg1) * 100 : 0;
+      if (Math.abs(pctChange) >= 8) {
+        insights.push({
+          type: diff > 0 ? "good" : "warn",
+          text: "Fleet usage is <b>" + (diff > 0 ? "trending up" : "trending down") + "</b> — averaging " +
+                avg1.toFixed(1) + " vehicles/day in the first half of the range vs " + avg2.toFixed(1) + " in the second half " +
+                "(" + (pctChange > 0 ? "+" : "") + pctChange.toFixed(0) + "%)."
+        });
+      } else {
+        insights.push({
+          type: "default",
+          text: "Fleet usage has been <b>steady</b> across the range, averaging around " + ((avg1 + avg2) / 2).toFixed(1) + " vehicles out per day."
+        });
+      }
+    }
+
+    // Top vehicle
+    if (vehicleStats.length) {
+      var top = vehicleStats[0];
+      insights.push({
+        type: "good",
+        text: "<b>" + top.name + "</b> is your most-used vehicle — out " + top.pct.toFixed(0) + "% of days and " +
+              Math.round(top.totalMiles).toLocaleString() + " " + unitLabel + " over this range."
+      });
+    }
+
+    // Low-utilization vehicles
+    var lowUsage = vehicleStats.filter(function (v) { return v.pct < 15; });
+    if (lowUsage.length) {
+      var names = lowUsage.slice(0, 4).map(function (v) { return v.name; }).join(", ");
+      var more = lowUsage.length > 4 ? " and " + (lowUsage.length - 4) + " more" : "";
+      insights.push({
+        type: "warn",
+        text: "<b>" + lowUsage.length + " vehicle" + (lowUsage.length === 1 ? "" : "s") + "</b> used less than 15% of the days in range: " +
+              names + more + ". Worth checking whether these are still active, or if they're test/spare units cluttering the report."
+      });
+    }
+
+    // Anomaly detection: single-day mileage far above a vehicle's own typical day
+    var anomalies = [];
+    devices.forEach(function (d) {
+      var dayMiles = [];
+      dayKeys.forEach(function (key) {
+        var rec = deviceDayData[d.id][key];
+        if (rec.distanceKm > 0) { dayMiles.push({ key: key, miles: rec.distanceKm * KM_TO_MI }); }
+      });
+      if (dayMiles.length < 3) { return; }
+      var avgMi = dayMiles.reduce(function (a, b) { return a + b.miles; }, 0) / dayMiles.length;
+      dayMiles.forEach(function (dm) {
+        if (dm.miles > avgMi * 3 && dm.miles > 100) {
+          anomalies.push({ name: d.name, key: dm.key, miles: dm.miles, avg: avgMi });
+        }
+      });
+    });
+    anomalies.sort(function (a, b) { return b.miles - a.miles; });
+    if (anomalies.length) {
+      var a0 = anomalies[0];
+      insights.push({
+        type: "warn",
+        text: "Possible data anomaly: <b>" + a0.name + "</b> logged " + Math.round(a0.miles).toLocaleString() + " " + unitLabel +
+              " on " + formatDateShort(a0.key) + " — well above its typical day (~" + Math.round(a0.avg) + " " + unitLabel + "). " +
+              "Could be a real long haul, but worth a quick sanity check against GPS/trip data." +
+              (anomalies.length > 1 ? " (" + (anomalies.length - 1) + " more day" + (anomalies.length > 2 ? "s" : "") + " flagged similarly.)" : "")
+      });
+    }
+
+    insights.forEach(function (ins) {
+      var li = document.createElement("li");
+      li.className = "insight-item" + (ins.type === "warn" ? " warn" : ins.type === "good" ? " good" : "");
+      var icon = ins.type === "warn" ? "!" : ins.type === "good" ? "✓" : "i";
+      li.innerHTML = '<span class="insight-icon">' + icon + '</span><span class="insight-text">' + ins.text + '</span>';
+      list.appendChild(li);
+    });
+  }
+
+  // ---- rendering: calendar ---------------------------------------------------
 
   function buildCalendar(dailyByKey, fromKey, toKey, totalVehicles) {
     var container = document.getElementById("calendarContainer");
@@ -484,21 +679,27 @@ geotab.addin.fleetUsageReport = function () {
     legend.innerHTML += " More vehicles out";
   }
 
-  function buildMileageGrid(devices, deviceDayData, dayKeys, isMetric) {
+  // ---- rendering: mileage grid ---------------------------------------------------
+
+  function buildMileageGrid(devices, deviceDayData, dayKeys, isMetric, vehicleStatsByName) {
     var unitLabel = isMetric ? "km" : "mi";
     document.getElementById("gridSubtitle").textContent =
-      "Which vehicle ran on which day, and how far (" + unitLabel + "). Scroll right for more dates.";
+      "Which vehicle ran on which day, and how far (" + unitLabel + "). Scroll right for more dates. Orange outline = unusually high single-day mileage for that vehicle.";
 
     var table = document.getElementById("mileageGrid");
     table.innerHTML = "";
 
     var maxMiles = 0;
+    var vehicleAvg = {};
     devices.forEach(function (d) {
+      var vals = [];
       dayKeys.forEach(function (key) {
         var rec = deviceDayData[d.id][key];
         var miles = isMetric ? rec.distanceKm : rec.distanceKm * KM_TO_MI;
         if (miles > maxMiles) { maxMiles = miles; }
+        if (miles > 0) { vals.push(miles); }
       });
+      vehicleAvg[d.id] = vals.length ? vals.reduce(function (a, b) { return a + b; }, 0) / vals.length : 0;
     });
 
     var thead = document.createElement("thead");
@@ -518,6 +719,8 @@ geotab.addin.fleetUsageReport = function () {
     var tbody = document.createElement("tbody");
     devices.forEach(function (d) {
       var tr = document.createElement("tr");
+      tr.setAttribute("data-vehicle-name", d.name.toLowerCase());
+      tr.setAttribute("data-vehicle-pct", (vehicleStatsByName[d.name] || 0).toFixed(2));
       var vehTd = document.createElement("td");
       vehTd.className = "veh-col";
       vehTd.textContent = d.name;
@@ -532,17 +735,56 @@ geotab.addin.fleetUsageReport = function () {
           td.textContent = "–";
         } else {
           var pct = maxMiles ? miles / maxMiles : 0;
-          td.className = "mi-cell";
+          var isAnomaly = vehicleAvg[d.id] > 0 && miles > vehicleAvg[d.id] * 3 && miles > 100;
+          td.className = "mi-cell" + (isAnomaly ? " anomaly" : "");
           td.style.background = colorForMileagePct(pct);
           td.textContent = miles >= 10 ? Math.round(miles) : miles.toFixed(1);
-          td.title = d.name + " — " + formatDateShort(key) + ": " + miles.toFixed(1) + " " + unitLabel + " (" + rec.count + " trip" + (rec.count === 1 ? "" : "s") + ")";
+          td.title = d.name + " — " + formatDateShort(key) + ": " + miles.toFixed(1) + " " + unitLabel + " (" + rec.count + " trip" + (rec.count === 1 ? "" : "s") + ")" +
+                     (isAnomaly ? " — unusually high vs this vehicle's typical day (~" + Math.round(vehicleAvg[d.id]) + " " + unitLabel + ")" : "");
         }
         tr.appendChild(td);
       });
       tbody.appendChild(tr);
     });
     table.appendChild(tbody);
+
+    applyGridFilter();
   }
+
+  function applyGridFilter() {
+    var query = (document.getElementById("vehicleFilter").value || "").toLowerCase().trim();
+    var hideLow = document.getElementById("hideLowUsage").checked;
+    var rows = document.querySelectorAll("#mileageGrid tbody tr");
+    var utilRows = document.querySelectorAll("#vehicleTableBody tr");
+    var visibleCount = 0;
+
+    function shouldHide(name, pct) {
+      if (query && name.indexOf(query) === -1) { return true; }
+      if (hideLow && pct < 10) { return true; }
+      return false;
+    }
+
+    rows.forEach(function (tr) {
+      var name = tr.getAttribute("data-vehicle-name") || "";
+      var pct = parseFloat(tr.getAttribute("data-vehicle-pct") || "0");
+      var hide = shouldHide(name, pct);
+      tr.classList.toggle("row-hidden", hide);
+      if (!hide) { visibleCount++; }
+    });
+
+    utilRows.forEach(function (tr) {
+      var name = (tr.getAttribute("data-vehicle-name") || "").toLowerCase();
+      var pct = parseFloat(tr.getAttribute("data-vehicle-pct") || "0");
+      tr.classList.toggle("row-hidden", shouldHide(name, pct));
+    });
+
+    var countEl = document.getElementById("filterCount");
+    if (countEl) {
+      countEl.textContent = visibleCount + " of " + rows.length + " vehicles shown";
+    }
+  }
+
+  // ---- main render ---------------------------------------------------
 
   function render(devices, trips, fromKey, toKey, isMetric) {
     var deviceDayData = {};
@@ -567,7 +809,6 @@ geotab.addin.fleetUsageReport = function () {
       entry.distanceKm += (typeof trip.distance === "number" ? trip.distance : 0);
     });
 
-    // fleet-wide daily calendar data
     var dailyByKey = {};
     dayKeys.forEach(function (key) {
       var count = 0;
@@ -603,9 +844,6 @@ geotab.addin.fleetUsageReport = function () {
       summaryEl.appendChild(div);
     });
 
-    buildCalendar(dailyByKey, fromKey, toKey, totalVehicles);
-    buildMileageGrid(devices, deviceDayData, dayKeys, isMetric);
-
     var unitLabel = isMetric ? "km" : "mi";
     var vehicleStats = devices.map(function (d) {
       var daysOut = 0;
@@ -620,11 +858,21 @@ geotab.addin.fleetUsageReport = function () {
       return { name: d.name, daysOut: daysOut, pct: pct, totalMiles: totalMiles };
     }).sort(function (a, b) { return b.pct - a.pct; });
 
+    var vehicleStatsByName = {};
+    vehicleStats.forEach(function (v) { vehicleStatsByName[v.name] = v.pct; });
+
+    buildTrendChart(dayKeys, counts, totalVehicles);
+    buildInsights(devices, deviceDayData, dayKeys, vehicleStats, unitLabel);
+    buildCalendar(dailyByKey, fromKey, toKey, totalVehicles);
+    buildMileageGrid(devices, deviceDayData, dayKeys, isMetric, vehicleStatsByName);
+
     var vehicleBody = document.getElementById("vehicleTableBody");
     vehicleBody.innerHTML = "";
     var badgeClasses = ["gold", "silver", "bronze"];
     vehicleStats.forEach(function (v, idx) {
       var tr = document.createElement("tr");
+      tr.setAttribute("data-vehicle-name", v.name.toLowerCase());
+      tr.setAttribute("data-vehicle-pct", v.pct.toFixed(2));
       var badge = idx < 3
         ? '<span class="rank-badge ' + badgeClasses[idx] + '">' + (idx + 1) + '</span>'
         : '<span class="rank-badge">' + (idx + 1) + '</span>';
@@ -639,6 +887,7 @@ geotab.addin.fleetUsageReport = function () {
       vehicleBody.appendChild(tr);
     });
 
+    applyGridFilter();
     document.getElementById("results").classList.remove("hidden");
   }
 
@@ -681,6 +930,8 @@ geotab.addin.fleetUsageReport = function () {
 
       defaultDates();
       elRunBtn.addEventListener("click", runReport);
+      document.getElementById("vehicleFilter").addEventListener("input", applyGridFilter);
+      document.getElementById("hideLowUsage").addEventListener("change", applyGridFilter);
       runReport();
 
       callback();
