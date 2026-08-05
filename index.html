@@ -121,7 +121,7 @@
   .cal-month { margin-bottom: 22px; }
   .cal-month:last-child { margin-bottom: 0; }
   .cal-month-title { font-size: 13px; font-weight: 700; color: #0072c6; margin-bottom: 8px; }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .cal-grid { display: grid !important; grid-template-columns: repeat(7, 1fr) !important; gap: 5px !important; width: 100%; }
   .cal-weekday {
     font-size: 10px;
     font-weight: 700;
@@ -135,12 +135,14 @@
     border-radius: 7px;
     aspect-ratio: 1 / 1;
     min-height: 54px;
+    max-width: 100%;
     padding: 5px 6px;
-    display: flex;
-    flex-direction: column;
+    display: flex !important;
+    flex-direction: column !important;
     justify-content: space-between;
     transition: transform 0.1s ease, box-shadow 0.1s ease;
     cursor: default;
+    box-sizing: border-box;
   }
   .cal-cell.has-data:hover { transform: scale(1.06); box-shadow: 0 4px 12px rgba(0,0,0,0.18); z-index: 2; }
   .cal-cell.empty { background: transparent; }
@@ -633,6 +635,9 @@ geotab.addin.fleetUsageReport = function () {
 
       var grid = document.createElement("div");
       grid.className = "cal-grid";
+      grid.style.display = "grid";
+      grid.style.gridTemplateColumns = "repeat(7, 1fr)";
+      grid.style.gap = "5px";
       WEEKDAY_LABELS.forEach(function (wd) {
         var el = document.createElement("div");
         el.className = "cal-weekday";
