@@ -411,22 +411,6 @@ geotab.addin.fleetUsageReport = function () {
     });
   }
 
-  function getIsMetric(callback) {
-    apiRef.getSession(function (session) {
-      if (!session || !session.userName) { callback(false); return; }
-      apiRef.call("Get", {
-        typeName: "User",
-        search: { name: session.userName }
-      }, function (users) {
-        if (users && users.length && typeof users[0].isMetric === "boolean") {
-          callback(users[0].isMetric);
-        } else {
-          callback(false);
-        }
-      }, function () { callback(false); });
-    }, function () { callback(false); });
-  }
-
   // ---- rendering ---------------------------------------------------
 
   function buildCalendar(dailyByKey, fromKey, toKey, totalVehicles) {
@@ -679,13 +663,11 @@ geotab.addin.fleetUsageReport = function () {
         reEnable();
         return;
       }
-      getIsMetric(function (isMetric) {
-        getTrips(fromISO, toISO, function (trips) {
-          setStatus("");
-          render(devices, trips, fromKey, toKey, isMetric);
-          reEnable();
-        }, reEnable);
-      });
+      getTrips(fromISO, toISO, function (trips) {
+        setStatus("");
+        render(devices, trips, fromKey, toKey, false); // false = report in miles
+        reEnable();
+      }, reEnable);
     }, reEnable);
   }
 
