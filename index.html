@@ -374,7 +374,15 @@ geotab.addin.fleetUsageReport = function () {
 
   // ---- data fetching ---------------------------------------------------
 
-  function getActiveDevices(callback) {
+  function describeError(err) {
+    if (!err) { return "Unknown error"; }
+    if (typeof err === "string") { return err; }
+    if (err.message) { return err.message; }
+    if (err.name) { return err.name; }
+    try { return JSON.stringify(err); } catch (e) { return String(err); }
+  }
+
+  function getActiveDevices(callback, onError) {
     apiRef.call("Get", { typeName: "Device", resultsLimit: 1000 }, function (devices) {
       var now = new Date();
       var active = devices.filter(function (d) {
@@ -383,11 +391,13 @@ geotab.addin.fleetUsageReport = function () {
       });
       callback(active);
     }, function (err) {
-      setStatus("Error loading devices: " + (err && err.message ? err.message : err), true);
+      console.error("Fleet Usage Report - Device Get failed:", err);
+      setStatus("Error loading devices: " + describeError(err) + " — try again in a moment, or refresh MyGeotab.", true);
+      onError();
     });
   }
 
-  function getTrips(fromISO, toISO, callback) {
+  function getTrips(fromISO, toISO, callback, onError) {
     apiRef.call("Get", {
       typeName: "Trip",
       search: { fromDate: fromISO, toDate: toISO },
@@ -395,7 +405,9 @@ geotab.addin.fleetUsageReport = function () {
     }, function (trips) {
       callback(trips);
     }, function (err) {
-      setStatus("Error loading trips: " + (err && err.message ? err.message : err), true);
+      console.error("Fleet Usage Report - Trip Get failed:", err);
+      setStatus("Error loading trips: " + describeError(err) + " — try again in a moment, or refresh MyGeotab.", true);
+      onError();
     });
   }
 
@@ -659,20 +671,22 @@ geotab.addin.fleetUsageReport = function () {
     var fromISO = new Date(fromKey + "T00:00:00").toISOString();
     var toISO = new Date(toKey + "T23:59:59").toISOString();
 
+    var reEnable = function () { elRunBtn.disabled = false; };
+
     getActiveDevices(function (devices) {
       if (!devices.length) {
         setStatus("No active devices found on this database.", true);
-        elRunBtn.disabled = false;
+        reEnable();
         return;
       }
       getIsMetric(function (isMetric) {
         getTrips(fromISO, toISO, function (trips) {
           setStatus("");
           render(devices, trips, fromKey, toKey, isMetric);
-          elRunBtn.disabled = false;
-        });
+          reEnable();
+        }, reEnable);
       });
-    });
+    }, reEnable);
   }
 
   return {
